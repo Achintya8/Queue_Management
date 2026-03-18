@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QueueFlow – My Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css" />
+    <style>
+        body {
+            display: block;
+            visibility: hidden;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-nav {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .logo-nav span {
+            color: var(--secondary-color);
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            color: var(--secondary-color);
+            border-bottom-color: var(--secondary-color);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .active-queue-card {
+            padding: 2rem;
+        }
+
+        .token-number {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--secondary-color);
+            line-height: 1;
+        }
+
+        .queue-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .meta-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .meta-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .meta-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .qr-box {
+            text-align: center;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .services-intro {
+            margin-bottom: 1.5rem;
+        }
+
+        .services-intro h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .services-intro p {
+            color: var(--text-muted);
+        }
+
+        .service-card {
+            padding: 1.5rem;
+            cursor: pointer;
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .service-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .service-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-wait {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .join-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(80, 227, 194, 0.4);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+        }
+
+        .history-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .history-table tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: #1e293b;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-outline {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-muted);
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #34d399;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #f87171;
+        }
+
+        /* Mobile Adjustments for Dashboard specific elements */
+        @media screen and (max-width: 768px) {
+            .token-number { font-size: 3rem; }
+            .queue-meta { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+            .tabs { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+            .active-queue-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo-nav">Queue<span>Flow</span></div>
+        <div class="nav-links">
+            <div class="user-pill"><span id="userName">...</span></div>
+            <button onclick="logout()"
+                style="padding:0.5rem 1rem;background:transparent;border:1px solid var(--glass-border);border-radius:8px;color:var(--text-muted);cursor:pointer;font-family:inherit;font-size:0.85rem;">Sign
+                Out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-active" onclick="switchTab('active')">🎟️ My Queue</button>
+            <button class="tab-btn" id="tab-services" onclick="switchTab('services')">🗂️ Services</button>
+            <button class="tab-btn" id="tab-history" onclick="switchTab('history')">📋 History</button>
+        </div>
+
+        <div class="tab-content active" id="content-active">
+            <div id="activeAlert" class="alert"></div>
+            <div id="noActiveQueue" class="empty-state" style="display:none;">
+                <div class="empty-icon">🎫</div>
+                <h3>You're not in any queue right now</h3>
+                <p style="color:var(--text-muted);margin-top:0.5rem;">Go to <a href="#"
+                        onclick="switchTab('services')">Services</a> to join a queue.</p>
+            </div>
+            <div id="activeQueueView" style="display:none;">
+                <div class="glass-container active-queue-card">
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem;">YOUR TOKEN</p>
+                    <div class="token-number" id="tokenNumber">--</div>
+                    <div style="margin-top:0.5rem;"><span class="badge" id="queueStatusBadge">waiting</span></div>
+                    <div class="queue-meta">
+                        <div class="meta-item">
+                            <div class="meta-value" id="positionValue">--</div>
+                            <div class="meta-label">Position</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-value" id="etaValue">--</div>
+                            <div class="meta-label">Est. Wait (min)</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-value" id="serviceValue">--</div>
+                            <div class="meta-label">Service</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-value" id="counterValue">--</div>
+                            <div class="meta-label">Counter</div>
+                        </div>
+                    </div>
+                    <div class="qr-box">
+                        <div id="qrcode"></div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem;">Show this QR at the
+                            counter</p>
+                    </div>
+                    <button class="btn btn-danger" style="width:auto;margin-top:1.5rem;padding:0.6rem 1.5rem;"
+                        id="cancelQueueBtn">Cancel Queue</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="content-services">
+            <div class="services-intro">
+                <h2>Available Services</h2>
+                <p>Select a service to join the queue.</p>
+            </div>
+            <div id="alreadyInQueueAlert" class="alert alert-error"></div>
+            <div class="grid" id="servicesGrid">
+                <p style="color:var(--text-muted);">Loading services...</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="content-history">
+            <h2 style="margin-bottom:1.5rem;">Queue History</h2>
+            <div class="glass-container" style="padding:0;overflow:hidden;">
+                <table class="history-table responsive-table-mobile">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Counter</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal">
+            <h3>Cancel your queue?</h3>
+            <p>You will lose your current position. This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn-outline" onclick="closeCancelModal()">Keep my spot</button>
+                <button class="btn btn-danger" style="flex:1;width:auto;" id="confirmCancelBtn">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Auth check — NOTHING runs below if user is not authenticated
+        const _user = requireAuth('user');
+
+        if (_user) {
+            document.body.style.visibility = 'visible';
+            document.getElementById('userName').textContent = _user.name || 'User';
+
+            let activeQueueData = null;
+            const SERVICES = [
+                { id: 1, name: 'General Inquiry', icon: '💬', desc: 'General information and assistance.' },
+                { id: 2, name: 'Account Services', icon: '👤', desc: 'Manage accounts and personal records.' },
+                { id: 3, name: 'Document Processing', icon: '📄', desc: 'Submit and collect official documents.' },
+                { id: 4, name: 'Technical Support', icon: '🔧', desc: 'Get help with technical issues.' },
+            ];
+
+            function switchTab(tab) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('tab-' + tab).classList.add('active');
+                document.getElementById('content-' + tab).classList.add('active');
+                if (tab === 'history') loadHistory();
+            }
+            window.switchTab = switchTab;
+
+            async function loadActiveQueue() {
+                try {
+                    const data = await apiRequest('/queue/active');
+                    if (data.data) {
+                        activeQueueData = data.data;
+                        showActiveQueue(data.data);
+                    } else {
+                        activeQueueData = null;
+                        document.getElementById('noActiveQueue').style.display = 'block';
+                        document.getElementById('activeQueueView').style.display = 'none';
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            function showActiveQueue(q) {
+                document.getElementById('noActiveQueue').style.display = 'none';
+                document.getElementById('activeQueueView').style.display = 'block';
+                document.getElementById('tokenNumber').textContent = '#' + q.tokenNumber;
+                document.getElementById('positionValue').textContent = q.position ?? '--';
+                document.getElementById('etaValue').textContent = q.estimatedWaitTime ?? '--';
+                document.getElementById('serviceValue').textContent = q.serviceType ?? '--';
+                document.getElementById('counterValue').textContent = q.counterName ?? '—';
+                const badge = document.getElementById('queueStatusBadge');
+                badge.textContent = q.status;
+                badge.className = 'badge badge-' + q.status;
+                const qrEl = document.getElementById('qrcode');
+                qrEl.innerHTML = '';
+                new QRCode(qrEl, { text: q.qrCode || JSON.stringify({ queueId: q.queueId, token: q.tokenNumber }), width: 240, height: 240 });
+            }
+
+            function closeCancelModal() { document.getElementById('cancelModal').classList.remove('open'); }
+            window.closeCancelModal = closeCancelModal;
+
+            document.getElementById('cancelQueueBtn').addEventListener('click', () => {
+                document.getElementById('cancelModal').classList.add('open');
+            });
+
+            document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+                if (!activeQueueData) return;
+                document.getElementById('confirmCancelBtn').textContent = 'Cancelling...';
+                document.getElementById('confirmCancelBtn').disabled = true;
+                try {
+                    await apiRequest('/queue/' + activeQueueData.queueId + '/cancel', { method: 'DELETE' });
+                    closeCancelModal();
+                    const alertEl = document.getElementById('activeAlert');
+                    alertEl.textContent = 'Queue cancelled successfully.';
+                    alertEl.className = 'alert alert-success';
+                    alertEl.style.display = 'block';
+                    setTimeout(() => { alertEl.style.display = 'none'; }, 4000);
+                    loadActiveQueue();
+                } catch (e) { console.error('Cancel error:', e.message); }
+                finally {
+                    document.getElementById('confirmCancelBtn').textContent = 'Yes, Cancel';
+                    document.getElementById('confirmCancelBtn').disabled = false;
+                }
+            });
+
+            function loadServices() {
+                document.getElementById('servicesGrid').innerHTML = SERVICES.map(s => `
+                    <div class="glass-container service-card">
+                        <div class="service-icon">${s.icon}</div>
+                        <div class="service-title">${s.name}</div>
+                        <div class="service-desc">${s.desc}</div>
+                        <div class="service-meta">
+                            <span class="service-wait">~5-15 min wait</span>
+                            <button class="join-btn" id="joinBtn-${s.id}" onclick="joinQueue(${s.id})">Join Queue</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            async function joinQueue(serviceId) {
+                const btn = document.getElementById('joinBtn-' + serviceId);
+                btn.textContent = 'Joining...'; btn.disabled = true;
+                const alertEl = document.getElementById('alreadyInQueueAlert');
+                alertEl.style.display = 'none';
+                try {
+                    const data = await apiRequest('/queue/join', { method: 'POST', body: JSON.stringify({ serviceId }) });
+                    activeQueueData = data.data;
+                    switchTab('active');
+                    await loadActiveQueue();
+                } catch (e) {
+                    alertEl.textContent = e.message;
+                    alertEl.style.display = 'block';
+                    btn.textContent = 'Join Queue'; btn.disabled = false;
+                }
+            }
+            window.joinQueue = joinQueue;
+
+            async function loadHistory() {
+                const tbody = document.getElementById('historyBody');
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading...</td></tr>';
+                try {
+                    const data = await apiRequest('/queue/history?limit=20');
+                    const rows = data.data.queues;
+                    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">No history yet.</td></tr>'; return; }
+                    tbody.innerHTML = rows.map(r => `
+                        <tr>
+                            <td data-label="Token"><strong>#${r.tokenNumber}</strong></td>
+                            <td data-label="Service">${r.serviceType ?? '--'}</td>
+                            <td data-label="Status"><span class="badge badge-${r.status}">${r.status}</span></td>
+                            <td data-label="Date">${new Date(r.joinedAt).toLocaleDateString()}</td>
+                            <td data-label="Counter">${r.counterName ?? '—'}</td>
+                        </tr>
+                    `).join('');
+                } catch (e) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--danger);">${e.message}</td></tr>`;
+                }
+            }
+
+            // Init — only runs when authenticated
+            loadActiveQueue();
+            loadServices();
+            setInterval(loadActiveQueue, 30000);
+        }
+    </script>
+</body>
+
+</html>

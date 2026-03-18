@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QueueFlow – Sign In</title>
+  <meta name="description" content="Sign in to QueueFlow to manage your place in the queue effortlessly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/index.css" />
+  <style>
+    .logo {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 0.25rem;
+    }
+
+    .logo span {
+      color: var(--secondary-color);
+    }
+
+    .logo-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--glass-border);
+    }
+
+    .staff-link-btn {
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .staff-link-btn:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .dots-bg {
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+      background-size: 30px 30px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .center-screen {
+      position: relative;
+      z-index: 1;
+    }
+
+    #errorMsg {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dots-bg"></div>
+  <div class="center-screen">
+    <div class="glass-container auth-card animated">
+      <div class="logo">Queue<span>Flow</span></div>
+      <p class="logo-subtitle">Smart Queue Management</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input id="phone" type="tel" class="form-control" placeholder="e.g. 9876543210" required autocomplete="tel" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" type="password" class="form-control" placeholder="Enter your password" required
+            autocomplete="current-password" />
+        </div>
+        <p class="error-text" id="errorMsg"></p>
+        <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+      </form>
+
+      <div class="divider">or</div>
+
+      <button class="staff-link-btn" onclick="window.location.href='staff-login.html'">🔐 Staff / Admin Login</button>
+
+      <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+        Don't have an account? <a href="register.html">Create one</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    requireNoAuth();
+
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const loginBtn = document.getElementById('loginBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+      loginBtn.textContent = 'Signing in...';
+      loginBtn.disabled = true;
+
+      try {
+        const data = await apiRequest('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            phone: document.getElementById('phone').value,
+            password: document.getElementById('password').value,
+          })
+        });
+
+        // Attach type so requireAuth() can detect the portal to use
+        const userObj = { ...data.data.user, type: 'user' };
+        saveAuth(data.data.token, userObj);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = 'block';
+      } finally {
+        loginBtn.textContent = 'Sign In';
+        loginBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+
+</html>

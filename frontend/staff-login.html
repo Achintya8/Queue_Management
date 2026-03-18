@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QueueFlow – Staff Login</title>
+    <meta name="description" content="Staff and admin login portal for QueueFlow." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css" />
+    <style>
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 0.25rem;
+        }
+
+        .logo span {
+            color: #f97316;
+        }
+
+        .logo-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .staff-badge {
+            display: inline-block;
+            padding: 0.35rem 1rem;
+            background: rgba(249, 115, 22, 0.15);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: #f97316;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .dots-bg {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .center-screen {
+            position: relative;
+            z-index: 1;
+        }
+
+        #errorMsg {
+            display: none;
+        }
+
+        .btn-staff {
+            background: linear-gradient(135deg, #f97316, #ef4444);
+        }
+
+        .btn-staff:hover {
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dots-bg"></div>
+    <div class="center-screen">
+        <div class="glass-container auth-card animated">
+            <div class="logo">Queue<span>Flow</span></div>
+            <span class="staff-badge">🔐 Staff Portal</span>
+
+            <form id="staffLoginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input id="email" type="email" class="form-control" placeholder="staff@queueflow.com" required
+                        autocomplete="email" />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" class="form-control" placeholder="Staff password" required
+                        autocomplete="current-password" />
+                </div>
+                <p class="error-text" id="errorMsg"></p>
+                <button type="submit" class="btn btn-primary btn-staff" id="loginBtn">Sign In as Staff</button>
+            </form>
+
+            <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                <a href="index.html">← Back to user login</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        requireNoAuth();
+
+        const form = document.getElementById('staffLoginForm');
+        const errorMsg = document.getElementById('errorMsg');
+        const loginBtn = document.getElementById('loginBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+            loginBtn.textContent = 'Signing in...';
+            loginBtn.disabled = true;
+
+            try {
+                const data = await apiRequest('/auth/staff/login', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                    })
+                });
+
+                // Attach type so requireAuth('staff') works
+                const staffObj = { ...data.data.staff, type: 'staff' };
+                saveAuth(data.data.token, staffObj);
+                window.location.href = 'admin.html';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+            } finally {
+                loginBtn.textContent = 'Sign In as Staff';
+                loginBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

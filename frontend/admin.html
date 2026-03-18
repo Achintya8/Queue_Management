@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QueueFlow – Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css" />
+    <style>
+        body {
+            display: block;
+            visibility: hidden;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-nav {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .logo-nav span {
+            color: #f97316;
+        }
+
+        .staff-label {
+            font-size: 0.8rem;
+            background: rgba(249, 115, 22, 0.15);
+            color: #f97316;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .queue-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .queue-table th,
+        .queue-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+        }
+
+        .queue-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .queue-table tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-noshow {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #f87171;
+        }
+
+        .btn-served {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #34d399;
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-1px);
+        }
+
+        .serve-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .serve-bar-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .counter-select {
+            padding: 0.6rem 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-family: inherit;
+        }
+
+        .btn-serve-next {
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .btn-serve-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(80, 227, 194, 0.4);
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #34d399;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #f87171;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            color: #f97316;
+            border-bottom-color: #f97316;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .analytics-card {
+            padding: 1.5rem;
+        }
+
+        .analytics-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--secondary-color);
+        }
+
+        .analytics-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .scanner-btn {
+            padding: 0.6rem 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .scanner-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-muted);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: #1e293b;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        #reader {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Mobile Adjustments for Admin specific elements */
+        @media screen and (max-width: 768px) {
+            .stats-row { grid-template-columns: 1fr 1fr; margin-bottom: 1rem; }
+            .tabs { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+            .serve-bar { flex-direction: column; align-items: stretch; text-align: center; }
+            .action-btns { flex-direction: row; flex-wrap: wrap; gap: 0.5rem; }
+            .btn-sm { padding: 0.5rem; text-align: center; flex: 1; }
+        }
+        @media screen and (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <div class="logo-nav">Queue<span>Flow</span></div>
+            <span class="staff-label">Staff Portal</span>
+        </div>
+        <div class="nav-links">
+            <button class="scanner-btn" onclick="openScanner()">📷 Scan QR</button>
+            <span id="staffName" style="color:var(--text-muted);font-size:0.9rem;"></span>
+            <button onclick="logout()"
+                style="padding:0.5rem 1rem;background:transparent;border:1px solid var(--glass-border);border-radius:8px;color:var(--text-muted);cursor:pointer;font-family:inherit;font-size:0.85rem;">Sign
+                Out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Stats and Tabs same as before -->
+        <div id="globalAlert" class="alert"></div>
+
+        <div class="stats-row">
+            <div class="glass-container stat-card">
+                <div class="stat-value" id="statWaiting">--</div>
+                <div class="stat-label">Waiting</div>
+            </div>
+            <div class="glass-container stat-card">
+                <div class="stat-value" id="statServed">--</div>
+                <div class="stat-label">Served Today</div>
+            </div>
+            <div class="glass-container stat-card">
+                <div class="stat-value" id="statNoShow">--</div>
+                <div class="stat-label">No Shows</div>
+            </div>
+            <div class="glass-container stat-card">
+                <div class="stat-value" id="statAvgWait">--</div>
+                <div class="stat-label">Avg Wait (min)</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-queue" onclick="switchTab('queue')">📋 Live Queue</button>
+            <button class="tab-btn" id="tab-analytics" onclick="switchTab('analytics')">📊 Analytics</button>
+        </div>
+
+        <div class="tab-content active" id="content-queue">
+            <div class="glass-container serve-bar">
+                <div class="serve-bar-title">🎯 Serve Next Token</div>
+                <select class="counter-select" id="counterSelect">
+                    <option value="">Loading counters...</option>
+                </select>
+                <button class="btn-serve-next" id="serveNextBtn" onclick="serveNext()">Call Next →</button>
+            </div>
+            <div class="section-header">
+                <h2>Active Queue</h2>
+                <button onclick="loadQueue()"
+                    style="padding:0.5rem 1rem;background:transparent;border:1px solid var(--glass-border);border-radius:8px;color:var(--text-muted);cursor:pointer;font-family:inherit;font-size:0.85rem;">🔄
+                    Refresh</button>
+            </div>
+            <div class="glass-container" style="padding:0;overflow:hidden;">
+                <table class="queue-table responsive-table-mobile">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>User</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Position</th>
+                            <th>Counter</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="queueBody">
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading
+                                queue...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="content-analytics">
+            <h2 style="margin-bottom:1.5rem;">Queue Analytics</h2>
+            <div class="analytics-grid" id="analyticsGrid">
+                <p style="color:var(--text-muted);">Loading analytics...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="modal-overlay" id="scannerModal">
+        <div class="modal">
+            <h3 style="margin-bottom:0.5rem;">Scan Token QR</h3>
+            <p style="color:var(--text-muted);margin-bottom:1.5rem;font-size:0.9rem;">Scan the user's QR code to mark
+                them as served.</p>
+            <div id="reader"></div>
+            <div id="manualEntry" style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--glass-border);">
+                <p style="margin-bottom:0.5rem; font-size:0.9rem;"><strong>Or enter token manually:</strong></p>
+                <div style="display:flex; gap:0.5rem;">
+                    <input type="text" id="manualTokenInput" placeholder="Token # (e.g. 101)" class="counter-select"
+                        style="flex:1;">
+                    <button class="btn-serve-next" style="padding:0.6rem 1rem;" onclick="serveManual()">Serve</button>
+                </div>
+            </div>
+            <div id="cameraTroubleshoot"
+                style="display:none; margin-top:1rem; font-size:0.8rem; color:var(--text-muted); background:rgba(0,0,0,0.2); padding:1rem; border-radius:8px;">
+                <p>⚠️ **Camera not starting?**</p>
+                <p>Browsers require **HTTPS** (SSL) to access the camera when not on localhost.</p>
+                <p>Try accessing via `localhost` or use a tunnel (e.g., `npx localtunnel --port 4000`) to get an HTTPS
+                    link.</p>
+            </div>
+            <div class="modal-actions" style="margin-top:1.5rem;">
+                <button class="btn" style="background:rgba(255,255,255,0.1);color:white;width:auto;flex:1;"
+                    onclick="closeScanner()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const _user = requireAuth('staff');
+
+        if (_user) {
+            document.body.style.visibility = 'visible';
+            document.getElementById('staffName').textContent = _user.name || _user.username || 'Staff';
+
+            let scanner = null;
+
+            function openScanner() {
+                const counterId = document.getElementById('counterSelect').value;
+                if (!counterId) {
+                    showAlert('Please select a counter before scanning.', 'error');
+                    return;
+                }
+                document.getElementById('scannerModal').classList.add('open');
+
+                // Show troubleshooting if not localhost/https
+                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    document.getElementById('cameraTroubleshoot').style.display = 'block';
+                }
+
+                scanner = new Html5Qrcode("reader");
+                scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    async (decodedText) => {
+                        await handleScan(decodedText);
+                    },
+                    (error) => { /* ignore parse errors */ }
+                ).catch(err => {
+                    console.error('Camera start error:', err);
+                    document.getElementById('reader').innerHTML = `<p style="padding:1rem; color:#f87171; text-align:center;">Camera error: ${err}<br><small>Make sure you are using HTTPS or localhost.</small></p>`;
+                    document.getElementById('cameraTroubleshoot').style.display = 'block';
+                });
+            }
+            window.openScanner = openScanner;
+
+            async function serveManual() {
+                const tokenNo = document.getElementById('manualTokenInput').value?.trim();
+                const counterId = document.getElementById('counterSelect').value;
+                if (!tokenNo) return;
+
+                try {
+                    // Find queueId for this token number from the currently loaded queue
+                    const currentQueues = await apiRequest('/admin/queues?status=waiting,called,serving');
+                    const queues = currentQueues.data?.queues || [];
+                    const found = queues.find(q => q.tokenNumber.toString() === tokenNo || q.token_number?.toString() === tokenNo);
+
+                    if (!found) {
+                        showAlert('Token #' + tokenNo + ' not found in active queue.', 'error');
+                        return;
+                    }
+
+                    await markServed(found.queueId || found.queue_id);
+                    closeScanner();
+                    document.getElementById('manualTokenInput').value = '';
+                } catch (e) { showAlert(e.message, 'error'); }
+            }
+            window.serveManual = serveManual;
+
+            let isScanningQR = false;
+
+            async function handleScan(qrData) {
+                if (!scanner || isScanningQR) return;
+                isScanningQR = true;
+                const counterId = document.getElementById('counterSelect').value;
+                try {
+                    // Safely pause scanner to prevent deadlocks instead of stopping immediately
+                    if (scanner.getState && scanner.getState() === 2) {
+                        scanner.pause(true);
+                    }
+                    
+                    const response = await apiRequest('/admin/scan-qr', {
+                        method: 'POST',
+                        body: JSON.stringify({ qrData, counterId })
+                    });
+                    showAlert('✅ Token #' + response.data.tokenNumber + ' served successfully!', 'success');
+                    closeScanner();
+                    loadQueue();
+                    loadAnalytics();
+                } catch (e) {
+                    showAlert(e.message, 'error');
+                    closeScanner();
+                } finally {
+                    isScanningQR = false;
+                }
+            }
+
+            function closeScanner() {
+                if (scanner) {
+                    scanner.stop().catch(() => { });
+                    scanner = null;
+                }
+                document.getElementById('scannerModal').classList.remove('open');
+            }
+            window.closeScanner = closeScanner;
+
+            function switchTab(tab) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('tab-' + tab).classList.add('active');
+                document.getElementById('content-' + tab).classList.add('active');
+                if (tab === 'analytics') loadAnalytics();
+            }
+            window.switchTab = switchTab;
+
+            function showAlert(msg, type = 'success') {
+                const el = document.getElementById('globalAlert');
+                el.textContent = msg;
+                el.className = 'alert alert-' + type;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 5000);
+            }
+
+            async function loadQueue() {
+                const tbody = document.getElementById('queueBody');
+                try {
+                    const data = await apiRequest('/admin/queues?status=waiting,called,serving');
+                    const rows = data.data?.queues || data.data || [];
+                    document.getElementById('statWaiting').textContent = rows.filter(r => r.status === 'waiting').length;
+                    if (!rows.length) {
+                        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-muted);">No active queues 🎉</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = rows.map((q, i) => `
+                        <tr>
+                            <td data-label="Token"><strong>#${q.tokenNumber || q.token_number}</strong></td>
+                            <td data-label="User">${q.userName || q.user_name || '--'}</td>
+                            <td data-label="Service">${q.serviceName || q.service_name || '--'}</td>
+                            <td data-label="Status"><span class="badge badge-${q.status}">${q.status}</span></td>
+                            <td data-label="Position">${i + 1}</td>
+                            <td data-label="Counter">${q.counterName || q.counter_name || '--'}</td>
+                            <td data-label="Joined">${new Date(q.joinedAt || q.joined_at).toLocaleTimeString()}</td>
+                            <td data-label="Actions">
+                                <div class="action-btns">
+                                    <button class="btn-sm btn-served" onclick="markServed('${q.queueId || q.queue_id}')">✓ Served</button>
+                                    <button class="btn-sm btn-noshow" onclick="markNoShow('${q.queueId || q.queue_id}')">✗ No Show</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                } catch (e) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--danger);">${e.message}</td></tr>`;
+                }
+            }
+            window.loadQueue = loadQueue;
+
+            async function loadCounters() {
+                try {
+                    const data = await apiRequest('/admin/counters');
+                    const counters = data.data?.counters || [];
+                    const select = document.getElementById('counterSelect');
+                    select.innerHTML = counters.length
+                        ? counters.map(c => `<option value="${c.counterId}">${c.counterName}</option>`).join('')
+                        : '<option value="">No counters available</option>';
+                    if (counters.length > 0) select.value = counters[0].counterId;
+                } catch (e) {
+                    document.getElementById('counterSelect').innerHTML = '<option value="">Error loading counters</option>';
+                }
+            }
+
+            async function serveNext() {
+                const btn = document.getElementById('serveNextBtn');
+                const counterId = document.getElementById('counterSelect').value;
+                if (!counterId) { showAlert('Please select a counter first.', 'error'); return; }
+                btn.textContent = 'Calling...'; btn.disabled = true;
+                try {
+                    const data = await apiRequest('/admin/serve-next', { method: 'POST', body: JSON.stringify({ counterId }) });
+                    showAlert('✅ Token #' + data.data?.tokenNumber + ' has been called!', 'success');
+                    loadQueue();
+                } catch (e) { showAlert(e.message, 'error'); }
+                finally { btn.textContent = 'Call Next →'; btn.disabled = false; }
+            }
+            window.serveNext = serveNext;
+
+            async function markServed(queueId) {
+                try { await apiRequest('/admin/queue/' + queueId + '/served', { method: 'PUT' }); showAlert('Marked as served.', 'success'); loadQueue(); loadAnalytics(); }
+                catch (e) { showAlert(e.message, 'error'); }
+            }
+            window.markServed = markServed;
+
+            async function markNoShow(queueId) {
+                try { await apiRequest('/admin/queue/' + queueId + '/no-show', { method: 'PUT' }); showAlert('Marked as no-show.', 'success'); loadQueue(); loadAnalytics(); }
+                catch (e) { showAlert(e.message, 'error'); }
+            }
+            window.markNoShow = markNoShow;
+
+            async function loadAnalytics() {
+                const grid = document.getElementById('analyticsGrid');
+                try {
+                    const data = await apiRequest('/admin/analytics');
+                    const a = data.data || {};
+                    document.getElementById('statServed').textContent = a.servedToday ?? '--';
+                    document.getElementById('statNoShow').textContent = a.noShowToday ?? '--';
+                    document.getElementById('statAvgWait').textContent = a.avgWaitTime ?? '--';
+                    grid.innerHTML = `
+                        <div class="glass-container analytics-card"><div class="analytics-value">${a.totalQueues ?? '--'}</div><div class="analytics-label">Total Queues (Today)</div></div>
+                        <div class="glass-container analytics-card"><div class="analytics-value">${a.servedToday ?? '--'}</div><div class="analytics-label">Served Today</div></div>
+                        <div class="glass-container analytics-card"><div class="analytics-value">${a.noShowToday ?? '--'}</div><div class="analytics-label">No Shows Today</div></div>
+                        <div class="glass-container analytics-card"><div class="analytics-value">${a.avgWaitTime ?? '--'}m</div><div class="analytics-label">Avg Wait Time</div></div>
+                    `;
+                } catch (e) { grid.innerHTML = `<p style="color:var(--danger);">${e.message}</p>`; }
+            }
+
+            // Init
+            loadCounters();
+            loadQueue();
+            loadAnalytics();
+            setInterval(loadQueue, 15000);
+        }
+    </script>
+</body>
+
+</html>
