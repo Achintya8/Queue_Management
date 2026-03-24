@@ -1,0 +1,30 @@
+﻿
+> queue-management-backend@1.0.0 verify
+> ts-node src/utils/verify-db.ts
+
+≡ƒöì Verifying database setup...
+
+Γ£à Connected to PostgreSQL database
+≡ƒôè Tables created:
+   Γ£ô analytics_cache
+   Γ£ô counters
+   Γ£ô queue_logs
+   Γ£ô queues
+   Γ£ô service_types
+   Γ£ô staff
+   Γ£ô token_counter
+   Γ£ô users
+
+≡ƒÅó Service Types: 5
+   Γ£ô General Inquiry (10 min)
+   Γ£ô Account Opening (15 min)
+   Γ£ô Bill Payment (8 min)
+   Γ£ô Document Verification (12 min)
+   Γ£ô Customer Support (20 min)
+
+≡ƒûÑ∩╕Å  Counters: 3
+   Γ£ô General Inquiry - free
+   Γ£ô Account Opening - free
+   Γ£ô Bill Payment - free
+
+Γ£à Database verification complete!

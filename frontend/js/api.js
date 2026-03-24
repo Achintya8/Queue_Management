@@ -1,4 +1,7 @@
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api/v1`;
+// Auto-detect API URL: uses production server if not running locally, otherwise uses localhost
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? `http://localhost:3000/api/v1`
+    : `https://www.achintya-k.in/queue-flow/api/v1`;
 
 /**
  * Perform an API request with automatic token injection.
@@ -31,7 +34,7 @@ async function apiRequest(endpoint, options = {}) {
             if (response.status === 401 && endpoint !== '/auth/login' && endpoint !== '/auth/staff/login') {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                window.location.href = '/index.html';
+                window.location.href = 'index.html';
             }
             throw new Error(data.error || data.message || 'API request failed');
         }

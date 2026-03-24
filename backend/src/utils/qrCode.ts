@@ -20,8 +20,9 @@ userId: string
  */
 export const verifyQRData = (qrData: string): any | null => {
   try {
-    // Check if it matches our fast-scan UUID pattern
-    if (qrData && qrData.length === 36 && qrData.includes('-')) {
+    // Check if it matches our fast-scan UUID pattern strictly to avoid Postgres throwing 500
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (qrData && uuidRegex.test(qrData)) {
       return { queueId: qrData };
     }
 

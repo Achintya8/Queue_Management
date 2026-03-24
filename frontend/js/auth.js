@@ -29,7 +29,7 @@ function getAuth() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/index.html';
+    window.location.href = 'index.html';
 }
 
 // Redirect helpers — uses 'type' field ('user' or 'staff') for role detection
@@ -37,13 +37,13 @@ function requireAuth(type) {
     const { token, user } = getAuth();
 
     if (!token || !user) {
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
         return null;
     }
 
     if (type && user.type !== type) {
         // Silently redirect to correct portal
-        window.location.href = user.type === 'staff' ? '/admin.html' : '/dashboard.html';
+        window.location.href = user.type === 'staff' ? 'admin.html' : 'dashboard.html';
         return null;
     }
 
@@ -53,6 +53,6 @@ function requireAuth(type) {
 function requireNoAuth() {
     const { token, user } = getAuth();
     if (token && user) {
-        window.location.href = user.type === 'staff' ? '/admin.html' : '/dashboard.html';
+        window.location.href = user.type === 'staff' ? 'admin.html' : 'dashboard.html';
     }
 }
