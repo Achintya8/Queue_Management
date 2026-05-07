@@ -72,8 +72,6 @@ queue/
 ├── database/               # Database configuration
 │   ├── migrations/         # SQL schema migrations
 │   └── seeds/              # Initial seed data
-│
-└── readme.md              # This file
 ```
 
 ## Prerequisites
