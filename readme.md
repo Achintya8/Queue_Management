@@ -79,7 +79,7 @@ queue/
 - Node.js (v18 or higher)
 - PostgreSQL (v12 or higher)
 - Redis (v6 or higher)
-- npm or yarn
+- npm or yarn or bun
 
 ## Installation
 
